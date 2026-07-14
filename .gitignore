@@ -1,0 +1,13 @@
+# cached market data (re-downloaded on demand)
+data/raw/
+data/processed/
+
+# generated report + charts
+output/
+
+# python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.DS_Store
