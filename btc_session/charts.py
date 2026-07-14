@@ -78,8 +78,15 @@ _pct0 = FuncFormatter(lambda v, _: f"{v:+.0f}%")
 _pctv = FuncFormatter(lambda v, _: f"{v:.0f}%")
 
 
+def _caption(fig, th, symbol, idx, source):
+    """Footer stamping every standalone PNG with the asset, source and dates."""
+    span = f"{idx.min():%d %b} – {idx.max():%d %b %Y} UTC"
+    fig.text(0.5, 0.005, f"{symbol}  ·  {source}  ·  {span}",
+             ha="center", va="top", color=th["mut"], fontsize=8.5)
+
+
 # ----------------------------------------------------------------------------
-def dashboard(rr: RegimeResult, th: dict, save: Path | None = None) -> str:
+def dashboard(rr: RegimeResult, symbol: str, th: dict, save: Path | None = None) -> str:
     """3-panel session dashboard: return, buy/sell imbalance, volume share."""
     _setrc(th)
     idx = rr.index
@@ -95,7 +102,7 @@ def dashboard(rr: RegimeResult, th: dict, save: Path | None = None) -> str:
     a.axhline(0, color=th["axis"], lw=1)
     _place(a, idx[-1], [(cumulative_return(rr.daily[n]).iloc[-1],
                          f"{rr.stats[n].full_return:+.1f}%", _color(n, th)) for n in REGIONS], th)
-    a.set_title(f"Return earned during each region's {rr.regime.title.lower()} "
+    a.set_title(f"{symbol} — return earned during each region's {rr.regime.title.lower()} "
                 f"({rr.regime.hours_label})", fontsize=13, fontweight="bold",
                 color=th["ink"], loc="left", pad=8)
     a.set_ylabel("cumulative return")
@@ -130,11 +137,12 @@ def dashboard(rr: RegimeResult, th: dict, save: Path | None = None) -> str:
            fontsize=8.5, color=th["mut"], style="italic")
 
     _style(fig, (a, b, c), th, xmax)
+    _caption(fig, th, symbol, idx, "Binance spot 1h")
     return _b64(fig, save)
 
 
 # ----------------------------------------------------------------------------
-def open_interest(oi: OIResult, th: dict, save: Path | None = None) -> str:
+def open_interest(oi: OIResult, symbol: str, th: dict, save: Path | None = None) -> str:
     """2-panel OI verification: price vs OI (indexed) + long/short ratios."""
     _setrc(th)
     price, oih = oi.price, oi.oi
@@ -156,7 +164,7 @@ def open_interest(oi: OIResult, th: dict, save: Path | None = None) -> str:
     a.axhline(100, color=th["axis"], lw=1)
     _place(a, pxi.index[-1], [(pxi.iloc[-1], "BTC price", th["pxc"]),
                               (oii.iloc[-1], "Open interest", th["oi"])], th)
-    a.set_title("Price vs Open Interest (indexed to 100) — is the move real buying?",
+    a.set_title(f"{symbol} — price vs open interest (indexed to 100) — is the move real buying?",
                 fontsize=13, fontweight="bold", color=th["ink"], loc="left", pad=8)
     a.set_ylabel("indexed (start = 100)")
 
@@ -173,6 +181,7 @@ def open_interest(oi: OIResult, th: dict, save: Path | None = None) -> str:
            transform=b.transAxes, fontsize=8.5, color=th["mut"], style="italic")
 
     _style(fig, (a, b), th, xmax)
+    _caption(fig, th, symbol, price.index, "Binance USD-M futures + spot")
     return _b64(fig, save)
 
 

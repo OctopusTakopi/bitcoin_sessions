@@ -87,11 +87,11 @@ def main():
     print("Rendering charts …")
     charts_dir = args.output_dir / "charts"
     imgs_by_regime = {
-        k: charts.render_both(charts.dashboard, rr,
+        k: charts.render_both(charts.dashboard, rr, args.symbol,
                               out_stub=charts_dir / f"dashboard_{k}")
         for k, rr in regimes.items()
     }
-    oi_imgs = (charts.render_both(charts.open_interest, oi,
+    oi_imgs = (charts.render_both(charts.open_interest, oi, args.symbol,
                                   out_stub=charts_dir / "open_interest")
                if oi.available else None)
 
